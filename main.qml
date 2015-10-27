@@ -245,7 +245,7 @@ Window {
             property real approximateActivity: rating.activity + animatedActivityDeviation + 1.5
 
             x: approximateActivity / 25.0 * peopleView.width
-            y: peopleView.height - (approximateScore) / 2200 * peopleView.height - height / 2
+            y: peopleView.height - (approximateScore) / 2200 * peopleView.height - height / 2 - activityAxis.anchors.margins
             smooth: true
             antialiasing: true
             width: 100 * scaling
@@ -279,16 +279,16 @@ Window {
                     property: "animatedActivityDeviation"
                     duration: 20000 + Math.random() * 30*1000
                     easing.type: Easing.InOutQuad
-                    from: -1.5
-                    to: +1.5
+                    from: -0.5
+                    to: +0.5
                 }
                 NumberAnimation {
                     target: player
                     property: "animatedActivityDeviation"
                     duration: 20000 + Math.random() * 30*1000
                     easing.type: Easing.InOutQuad
-                    from: +1.5
-                    to: -1.5
+                    from: +0.5
+                    to: -0.5
                 }
             }
 
