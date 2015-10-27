@@ -11,6 +11,7 @@ Window {
     height: 1024
 
     property real scaling: Math.min(width, height) / 1000
+    property real maxScore: 2200
 
     ListModel {
         id: leaderboardModel
@@ -24,7 +25,8 @@ Window {
         console.log("Reloading")
 
         var req = new XMLHttpRequest;
-        req.open("GET", "http://fysfys.ranked.no/leaderboard.json");
+//        req.open("GET", "http://fysfys.ranked.no/leaderboard.json");
+        req.open("GET", "http://dragly.org/tmp/leaderboard.json");
         req.onreadystatechange = function() {
             var status = req.readyState;
             if (status === XMLHttpRequest.DONE) {
@@ -41,7 +43,7 @@ Window {
                         for(var i = 0; i < leaderboardModel.count; i++) {
                             var listObject = leaderboardModel.get(i)
                             if(listObject.user.id == jsonObject.user.id) {
-                                listObject = jsonObject
+                                leaderboardModel.set(i, jsonObject)
                                 alreadyInList = true
                             }
                         }
@@ -69,31 +71,28 @@ Window {
         }
         req.send();
 
-        var req2 = new XMLHttpRequest;
-        req2.open("GET", "http://fysfys.ranked.no/matches.json");
-        req2.onreadystatechange = function() {
-            var status = req2.readyState;
-            if (status === XMLHttpRequest.DONE) {
-                var objectArray = JSON.parse(req2.responseText);
-                console.log(req2.responseText)
-                if (objectArray.errors !== undefined)
-                    console.log("Error fetching matches: " + objectArray.errors[0].message)
-                else {
-                    matchModel.clear()
-                    var matchups = objectArray.summary[0].matchups
-                    for (var key in matchups) {
-                        console.log(key)
-                        var jsonObject = matchups[key];
-                        console.log(jsonObject.player_a[0].name)
-                        matchModel.append({"player_a_name": jsonObject.player_a[0].name,
-                                           "player_b_name": jsonObject.player_b[0].name,
-                                           "player_a_wins": jsonObject.player_a_wins,
-                                           "player_b_wins": jsonObject.player_b_wins})
-                    }
-                }
-            }
-        }
-        req2.send();
+//        var req2 = new XMLHttpRequest;
+//        req2.open("GET", "http://fysfys.ranked.no/matches.json");
+//        req2.onreadystatechange = function() {
+//            var status = req2.readyState;
+//            if (status === XMLHttpRequest.DONE) {
+//                var objectArray = JSON.parse(req2.responseText);
+//                if (objectArray.errors !== undefined)
+//                    console.log("Error fetching matches: " + objectArray.errors[0].message)
+//                else {
+//                    matchModel.clear()
+//                    var matchups = objectArray.summary[0].matchups
+//                    for (var key in matchups) {
+//                        var jsonObject = matchups[key];
+//                        matchModel.append({"player_a_name": jsonObject.player_a[0].name,
+//                                           "player_b_name": jsonObject.player_b[0].name,
+//                                           "player_a_wins": jsonObject.player_a_wins,
+//                                           "player_b_wins": jsonObject.player_b_wins})
+//                    }
+//                }
+//            }
+//        }
+//        req2.send();
     }
 
     Component.onCompleted: {
@@ -140,7 +139,7 @@ Window {
             left: parent.left
             top: parent.top
             bottom: parent.bottom
-            margins: 24
+            margins: 24 * scaling
         }
         width: 4
     }
@@ -163,11 +162,47 @@ Window {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            margins: 24
+            margins: 24 * scaling
         }
         height: 4
     }
 
+    Repeater {
+        id: lines
+        property real heightPerLine: windowRoot.height / parseInt(model)
+        anchors.fill: parent
+        model: parseInt(windowRoot.maxScore / 200)
+        onModelChanged: {
+            console.log(model)
+        }
+
+        delegate: Item {
+            visible: index > 0
+            y: windowRoot.height - anchors.margins - index * lines.heightPerLine
+            anchors {
+                left: lines.left
+                right: lines.right
+                margins: 24 * scaling
+            }
+            height: lines.heightPerLine
+            Text {
+                text: index * 200
+                anchors {
+                    bottom: line.top
+                    right: line.right
+                    margins: 12 * scaling
+                }
+                color: Qt.rgba(1.0, 1.0, 1.0, 0.5)
+            }
+
+            Rectangle {
+                id: line
+                color: Qt.rgba(1.0, 1.0, 1.0, 0.2)
+                width: parent.width
+                height: 2
+            }
+        }
+    }
 
     Text {
         anchors {
@@ -211,7 +246,7 @@ Window {
             property real approximateActivity: rating.activity + animatedActivityDeviation + 1.5
 
             x: approximateActivity / 25.0 * peopleView.width
-            y: peopleView.height - (approximateScore) / 2200 * peopleView.height
+            y: peopleView.height - (approximateScore) / 2200 * peopleView.height - height / 2
             smooth: true
             antialiasing: true
             width: 100 * scaling
@@ -387,6 +422,13 @@ Window {
             } else {
                 windowRoot.visibility = Window.FullScreen
             }
+        }
+    }
+
+    Shortcut {
+        sequence: StandardKey.Refresh
+        onActivated: {
+            reload()
         }
     }
 }
