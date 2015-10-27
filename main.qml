@@ -25,8 +25,7 @@ Window {
         console.log("Reloading")
 
         var req = new XMLHttpRequest;
-//        req.open("GET", "http://fysfys.ranked.no/leaderboard.json");
-        req.open("GET", "http://dragly.org/tmp/leaderboard.json");
+        req.open("GET", "http://fysfys.ranked.no/leaderboard.json");
         req.onreadystatechange = function() {
             var status = req.readyState;
             if (status === XMLHttpRequest.DONE) {
