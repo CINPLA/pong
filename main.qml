@@ -151,7 +151,7 @@ Window {
 
             property real approximateScore: 0.0
 
-            x: rating.activity * 50 * scaling + Math.random() * 50 * scaling
+            x: rating.activity / 25.0 * peopleView.width + Math.random() * 50 * scaling
             y: peopleView.height - approximateScore / 2500 * peopleView.height
             smooth: true
             antialiasing: true
@@ -286,6 +286,17 @@ Window {
         source: "qrc:///images/faceless.png"
         alpha: 0
         colorVariation: 0.6
+    }
+
+    Shortcut {
+        sequence: StandardKey.FullScreen
+        onActivated: {
+            if(windowRoot.visibility == Window.FullScreen) {
+                windowRoot.visibility = Window.AutomaticVisibility
+            } else {
+                windowRoot.visibility = Window.FullScreen
+            }
+        }
     }
 }
 
