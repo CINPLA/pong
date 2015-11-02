@@ -244,7 +244,7 @@ Window {
             property real approximateScore: rating.score + animatedScoreDeviation
             property real approximateActivity: rating.activity + animatedActivityDeviation + 1.5
 
-            x: approximateActivity / 25.0 * peopleView.width
+            x: approximateActivity / 35.0 * peopleView.width
             y: peopleView.height - (approximateScore) / 2200 * peopleView.height - height / 2 - activityAxis.anchors.margins
             smooth: true
             antialiasing: true
