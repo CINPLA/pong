@@ -12,6 +12,7 @@ Window {
 
     property real scaling: Math.min(width, height) / 1000
     property real maxScore: 2200
+    property real maxActivity: 30 // updated by script
 
     ListModel {
         id: leaderboardModel
@@ -38,6 +39,11 @@ Window {
                     //                    leaderboardModel.clear()
                     for (var key in objectArray) {
                         var jsonObject = objectArray[key];
+                        var activity = jsonObject.rating.activity + 10
+                        if(activity > windowRoot.maxActivity) {
+                            windowRoot.maxActivity = activity
+                        }
+
                         var alreadyInList = false
                         for(var i = 0; i < leaderboardModel.count; i++) {
                             var listObject = leaderboardModel.get(i)
@@ -169,11 +175,9 @@ Window {
     Repeater {
         id: lines
         property real heightPerLine: windowRoot.height / parseInt(model)
+        property int step: 200
         anchors.fill: parent
-        model: parseInt(windowRoot.maxScore / 200)
-        onModelChanged: {
-            console.log(model)
-        }
+        model: parseInt(windowRoot.maxScore / step)
 
         delegate: Item {
             visible: index > 0
@@ -185,7 +189,7 @@ Window {
             }
             height: lines.heightPerLine
             Text {
-                text: index * 200
+                text: index * lines.step
                 anchors {
                     bottom: line.top
                     right: line.right
@@ -203,11 +207,31 @@ Window {
         }
     }
 
+    Repeater {
+        id: activities
+        property real widthPerLine: (windowRoot.width - activityAxis.anchors.margins * 2) / parseInt(model)
+        property int step: 5
+        model: parseInt(windowRoot.maxActivity / step)
+
+        delegate: Item {
+            visible: index > 0
+            x: index * activities.widthPerLine
+            anchors {
+                bottom: activityAxis.top
+                margins: 24 * scaling
+            }
+            Text {
+                text: index * activities.step
+                color: Qt.rgba(1.0, 1.0, 1.0, 0.5)
+            }
+        }
+    }
+
     Text {
         anchors {
             right: activityAxis.right
             bottom: activityAxis.top
-            margins: 12
+            margins: 12 * scaling
         }
 
         text: "Activity"
@@ -242,9 +266,9 @@ Window {
             property real animatedScoreDeviation: 0.0
             property real animatedActivityDeviation: 0.0
             property real approximateScore: rating.score + animatedScoreDeviation
-            property real approximateActivity: rating.activity + animatedActivityDeviation + 1.5
+            property real approximateActivity: rating.activity // + animatedActivityDeviation + 1.5
 
-            x: approximateActivity / 35.0 * peopleView.width
+            x: approximateActivity / maxActivity * peopleView.width
             y: peopleView.height - (approximateScore) / 2200 * peopleView.height - height / 2 - activityAxis.anchors.margins
             smooth: true
             antialiasing: true
